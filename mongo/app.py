@@ -31,6 +31,10 @@ def add_query_to_db():
     if not query or not response:
         return jsonify({"error": "query와 response를 모두 제공해야 합니다."}), 400
     
+    result = collection.find_one({"query": query})
+    if result:
+        return jsonify({"error": "이미 존재하는 쿼리입니다."}), 400
+    
     query_vector = model.encode(query).tolist()
     collection.insert_one({"query": query, "response": response, "query_vector": query_vector})
 
