@@ -17,7 +17,7 @@ connectionString = "mongodb+srv://{}:{}@{}.njaly.mongodb.net/?retryWrites=true&w
 
 client = MongoClient(connectionString)
 
-db = client["support_db"]
+db = client["slack_bot_db"]
 collection = db["queries"]
 
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
