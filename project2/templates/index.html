@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot with MongoDB</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+    }
+    .chat-container {
+      width: 500px;
+      height: 700px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-window {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+    }
+    .message {
+      margin: 10px 0;
+    }
+    .message.user {
+      text-align: right;
+      color: white;
+      background: #4caf50;
+      padding: 10px;
+      border-radius: 15px;
+      max-width: 70%;
+      margin-left: auto;
+    }
+    .message.bot {
+      text-align: left;
+      color: black;
+      background: #e0e0e0;
+      padding: 10px;
+      border-radius: 15px;
+      max-width: 70%;
+      margin-right: auto;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+      padding: 5px;
+    }
+    .chat-input textarea {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 16px;
+      border-radius: 5px;
+      height: 40px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .chat-input button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 0 15px;
+      margin-left: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-window" id="chatWindow"></div>
+    <div class="chat-input">
+      <textarea id="userInput" placeholder="Type your question..." oninput="adjustInputHeight()"></textarea>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatWindow = document.getElementById("chatWindow");
+
+    // 페이지 로드 시 초기 메시지 추가
+    window.onload = () => {
+      addMessage("클래스 101 챗봇입니다. 무엇이든 물어보세요.", false);
+    };
+
+    // 메시지 추가 함수
+    function addMessage(content, isUser) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${isUser ? "user" : "bot"}`;
+      messageDiv.textContent = content;
+      chatWindow.appendChild(messageDiv);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // 입력 크기 동적 조정 함수
+    function adjustInputHeight() {
+      const userInput = document.getElementById("userInput");
+      userInput.style.height = "40px"; // 기본 높이로 초기화
+      userInput.style.height = userInput.scrollHeight + "px"; // 콘텐츠 높이에 맞게 확장
+    }
+
+    // 메시지 전송 함수
+    async function sendMessage() {
+      const userInput = document.getElementById("userInput");
+      const message = userInput.value.trim();
+      if (message) {
+        addMessage(message, true);
+        userInput.value = "";
+        adjustInputHeight(); // 입력 필드 높이 초기화
+
+        try {
+          const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({ question: message }),
+          });
+          const data = await response.json();
+          addMessage(data.answer, false);
+        } catch (error) {
+          addMessage("Error: Unable to connect to the server.", false);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
